@@ -28,9 +28,12 @@ class MinifyCss extends Minifier
         return preg_replace([
             // otomatis menambahkan semicolon atau titik koma (;) diakhir kode
             // kecuali yang diakhiri dengan braces ({}) ataupun dengan semicolon (;)
-            '#^[A-Za-z\s\-]+:.+(?<!({|}|;))$#m'
+            '#^[A-Za-z\s\-]+:.+(?<!({|}|;))$#m',
+
+            '#^([A-Za-z\s\-]+):(.+)[;]$(\n+|\s+){#m'
         ],[
-            '$0;'
+            '$0;',
+            '$1:$2$3{'
         ], $value);
     }
 
