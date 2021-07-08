@@ -49,7 +49,7 @@ atau
 
 ![Sebelum](example-output/before.jpg)
 
-![Sebelum](example-output/after.jpg)
+![Sesudah](example-output/after.jpg)
 
 ## Installasi
 
@@ -132,32 +132,29 @@ body{background-color:salmon;width:100%;height:100%}
 
 ##### [\DzId\LaravelHtmlMinifier\Middleware\MinifyJavascript::class](src/Middleware/MinifyJavascript.php)
 
-```JavascriptCss::class``` fungsinya adalah untuk minify kode javascript menghapus blank spasi dan juga baris baru menjadi satu baris.
+```MinifyJavascript::class``` fungsinya adalah untuk minify kode javascript menghapus blank spasi dan juga baris baru menjadi satu baris.
 
-pastikan kode javascript kamu selalu menggunakan titik koma (```;```) setiap pergantian baris baru.
+Catatan: jangan menggunakan kode tanpa kurung kurawal (```{}```) untuk if, elseif, else, while, for, dll. ini akan menyebebkan kode anda error, contohnya
+
+- kode yang disarankan
+```javascript
+for (let i = 0; i < 10; i++) {
+  console.log('hello dunia');
+}
+```
+
+- kode yang tidak disarankan, tanpa kurung kurawal biasanya akan menyebabkan error jika menggunakan ```MinifyJavascript::class```
+```javascript
+for (let i = 0; i < 10; i++)    // tanpa
+    console.log('hello dunia'); // kurung kurawal
+```
+
+- sesudah diminify
+```javascript
+for (let i = 0; i < 10; i++){console.log('hello dunia')}
+```
 
 kamu juga bisa mengaburkan kode javascript dengan menyetel ke ```true``` bagian ```"obfuscate_javascript"``` dalam file : [config/laravel-html-minifier.php](config/laravel-html-minifier.php)
-
-- contoh kode javascript yang benar
-```javascript
-(function() {
-   console.log("hello");
-   console.log("dunia");
-})();
-```
-
-- contoh kode javascript yang salah (karena tidak diakhiri dengan titik koma ini akan menyebabkan kode javascript anda error jika menggunakan ```MinifyJavascript::class```)
-```javascript
-(function() {
-   console.log("hello")
-   console.log("dunia")
-})()
-```
-
-- contoh sesudah diminify
-```javascript
-(function(){console.log("hello");console.log("dunia")})();
-```
 
 ## File Konfigurasi
 
@@ -185,6 +182,62 @@ Jika kode css anda mengalami bug saat menggunakan ```MinifyCss::class``` silahka
 // file: config/laravel-html-minifier.php
 
 "css_automatic_insert_semicolon" => env("LARAVEL_HTML_MINIFIER_CSS_AUTOMATIC_INSERT_SEMICOLON", true),
+```
+
+##### Otomatis Menambahkan Semicolon Atau Titik Koma Diakhir kode Pada Javascript
+
+Catatan: Jangan menggunakan jeda baris untuk while, do while, for, if, elseif, else, return, dll. ataupun kode tanpa kurung kurawal (```{}```). contohnya
+
+- kode yang disarankan
+```javascript
+var log = function(log) {
+   return console.log(log);
+}
+
+let i = 0;
+
+do {
+    if (i == 5) {
+       break;
+    }
+    i++;
+    log("hello dunia");
+} while (true);
+```
+
+- kode yang tidak disarankan, akan menyebabkan error jika mengaktifkan "js_automatic_insert_semicolon"
+```javascript
+var log = function(log) {
+   return               // jeda
+      console.log(log); // baris
+}
+
+let i = 0;
+
+do
+// jeda baris
+{
+    if (i == 5)  // tanpa
+        break;   // kurung kurawal
+    i++;
+    log("hello dunia");
+}
+// jeda baris
+while (true);
+```
+
+mungkin aja jika mengaktifkan bidang ini kode anda akan menjadi bug karena suatu kondisi yang salah
+dalam hal ini jika itu terjadi anda cukup menyetel bidang ini ke ```false```
+
+jangan lupa untuk selalu menggunakan titik koma pada kode javascript jika bidang ini disetel ke ```false```
+
+fungsi ini hanya berlaku jika menggunakan ```MinifyJavascript::class```
+
+```php
+
+// file: config/laravel-html-minifier.php
+
+"js_automatic_insert_semicolon" => env("LARAVEL_HTML_MINIFIER_JS_AUTOMATIC_INSERT_SEMICOLON", true),
 ```
 
 ##### Menghapus Komentar HTML
