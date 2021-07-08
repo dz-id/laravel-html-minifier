@@ -25,6 +25,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Otomatis menambahkan semicolon diakhir kode untuk Javascript
+    |--------------------------------------------------------------------------
+    |
+    | Silahkan setel bidang ini ke false
+    | jika kode Javascript anda mengalami bug atau tidak berfungi
+    | setelah menggunakan MinifyJavascript::class
+    |
+    | Dan jangan lupa untuk selalu mengakhiri dengan semicolon
+    | jika bidang ini disetel ke false.
+    */
+    "js_automatic_insert_semicolon" => env("LARAVEL_HTML_MINIFIER_JS_AUTOMATIC_INSERT_SEMICOLON", true),
+
+    /*
+    |--------------------------------------------------------------------------
     | Aktifkan penghapusan komentar pada HTML
     |--------------------------------------------------------------------------
     |
