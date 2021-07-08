@@ -109,6 +109,14 @@ class MinifyJavascript extends Minifier
                         $insert = $insert && (bool) !preg_match($r, $c);
                     }
 
+                    if ($insert)
+                    {
+                        if (preg_match("#^(})$#", trim($line)) && preg_match("#^(else|elseif|else\s*if)#", $c))
+                        {
+                            $insert = false;
+                        }
+                    }
+
                     break;
                 }
             }
