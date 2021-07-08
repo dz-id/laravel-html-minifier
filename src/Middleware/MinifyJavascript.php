@@ -38,8 +38,8 @@ class MinifyJavascript extends Minifier
         $code = explode("\n", trim($value));
 
         $patternRegex = [
-            // temukan string yang diakhiri dengan {, [, (, ,, ;, =>
-            '#(?:({|\[|\(|\\,|;|=>))$#',
+            // temukan string yang diakhiri dengan {, [, (, ,, ;, =>, :, ?
+            '#(?:({|\[|\(|,|;|=>|\:|\?))$#',
             // temukan blank spasi
             '#^\s*$#',
             // temukan string pertama dan terakhir do, else
@@ -82,7 +82,7 @@ class MinifyJavascript extends Minifier
                     }
 
                     $insert = true;
-                    $regex = ['#^({|}|\)|\]|\\.)#'];
+                    $regex = ['#^(\?|\:|,|\.|{|}|\)|\])#'];
 
                     foreach ($regex as $r)
                     {
