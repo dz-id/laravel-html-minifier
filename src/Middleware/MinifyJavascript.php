@@ -4,11 +4,15 @@ namespace DzId\LaravelHtmlMinifier\Middleware;
 
 class MinifyJavascript extends Minifier
 {
+    protected static $allowInsertSemicolon;
+
     protected function apply()
     {
         static::$minifyJavascriptHasBeenUsed = true;
 
         $obfuscate = (bool) config("laravel-html-minifier.obfuscate_javascript", false);
+
+        static::$allowInsertSemicolon = (bool) config("laravel-html-minifier.js_automatic_insert_semicolon", true);
 
         foreach ($this->getByTag("script") as $el)
         {
@@ -26,8 +30,90 @@ class MinifyJavascript extends Minifier
         return static::$dom->saveHtml();
     }
 
+    protected function insertSemicolon($value)
+    {
+        // hapus komentar
+        $value = preg_replace('/(?:(?:\/\*(?:[^*]|(?:\*+[^*\/]))*\*+\/)|(?:(?<!\:|\\\|\'|\")\/\/.*))/', '', $value);
+        $result = [];
+        $code = explode("\n", trim($value));
+
+        $patternRegex = [
+            // temukan string yang diakhiri dengan {, [, (, ,, ;, =>
+            '#(?:({|\[|\(|\\,|;|=>))$#',
+            // temukan blank spasi
+            '#^\s*$#',
+            // temukan string pertama dan terakhir do, else
+            '#^(do|else)$#'
+        ];
+
+        $loop = 0;
+
+        foreach ($code as $line)
+        {
+            $loop++;
+            $insert = false;
+            $shouldInsert = true;
+
+            foreach ($patternRegex as $pattern)
+            {
+                // jika pattern tidak cocok artinya boleh ditambahkan semicolon
+                $match = preg_match($pattern, trim($line));
+                $shouldInsert = $shouldInsert && (bool) !$match;
+            }
+
+            if ($shouldInsert)
+            {
+                $i = $loop;
+        
+                while (true)
+                {
+                    if ($i >= count($code))
+                    {
+                        $insert = true;
+                        break;
+                    }
+        
+                    $c = trim($code[$i]);
+                    $i++;
+                    
+                    if (!$c)
+                    {
+                        continue;
+                    }
+
+                    $insert = true;
+                    $regex = ['#^({|}|\)|\]|\\.)#'];
+
+                    foreach ($regex as $r)
+                    {
+                        $insert = $insert && (bool) !preg_match($r, $c);
+                    }
+
+                    break;
+                }
+            }
+
+            if ($insert)
+            {
+                $result[] = sprintf("%s;", $line);
+            }
+            else
+            {
+                $result[] = $line;
+            }
+            
+        }
+
+        return join("\n", $result);
+    } 
+
     protected function replace($value)
     {
+        if (static::$allowInsertSemicolon)
+        {
+            $value = $this->insertSemicolon($value);
+        }
+
         return trim(preg_replace([
             '#\s*("(?:[^"\\\]++|\\\.)*+"|\'(?:[^\'\\\\]++|\\\.)*+\')\s*|\s*\/\*(?!\!|@cc_on)(?>[\s\S]*?\*\/)\s*|\s*(?<![\:\=])\/\/.*(?=[\n\r]|$)|^\s*|\s*$#',
             // Remove white-space(s) outside the string and regex
