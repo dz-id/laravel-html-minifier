@@ -32,8 +32,28 @@ class MinifyJavascript extends Minifier
 
     protected function insertSemicolon($value)
     {
-        // hapus komentar
+        /**
+         * menghapus semua komentar
+         */
         $value = preg_replace('/(?:(?:\/\*(?:[^*]|(?:\*+[^*\/]))*\*+\/)|(?:(?<!\:|\\\|\'|\")\/\/.*))/', '', $value);
+        /**
+         * Menghapus baris baru string yang didalam tanda kutip (`)
+         * supaya tidak ada kesalahan saat penambahan semicolon
+         * 
+         * dari :
+         *  `
+         *   example...
+         *   example...
+         *  `
+         * 
+         * ke :
+         *   `example... example...`
+         *
+         */
+        $value = preg_replace_callback('/(`[\S\s]*?[^\\\`]`)/', function($m) {
+            return preg_replace('/\n+/', '', $m[1]);
+        }, $value);
+
         $result = [];
         $code = explode("\n", trim($value));
 
