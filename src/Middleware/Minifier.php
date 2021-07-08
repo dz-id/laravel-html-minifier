@@ -139,7 +139,7 @@ abstract class Minifier
 
         return static::$isEnable;
     }
-    
+
     protected function ignore() : array
     {
         /* Apakah laravel-html-minifier.enable belum dipanggil? */
@@ -178,7 +178,7 @@ abstract class Minifier
         }
 
         static::$dom = new DOMDocument;
-        @static::$dom->loadHTML($html);
+        @static::$dom->loadHTML($html, LIBXML_HTML_NODEFDTD | LIBXML_SCHEMA_CREATE);
     }
 
     protected function getByTag(string $tags) : array
