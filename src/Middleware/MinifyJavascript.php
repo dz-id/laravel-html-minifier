@@ -111,7 +111,7 @@ class MinifyJavascript extends Minifier
 
                     if ($insert)
                     {
-                        if (preg_match("#^(})$#", trim($line)) && preg_match("#^(else|elseif|else\s*if)#", $c))
+                        if (preg_match("#^(})$#", trim($line)) && preg_match("#^(else|elseif|else\s*if|catch)#", $c))
                         {
                             $insert = false;
                         }
